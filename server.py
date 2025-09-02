@@ -14,7 +14,7 @@ def loadCompetitions():
          return listOfCompetitions
     
 
-def saveClubs():
+def save_clubs():
     with open('clubs.json', 'w') as c:
         json.dump({'clubs': clubs}, c)
 
