@@ -1,5 +1,12 @@
 import json
-from flask import Flask,render_template,request,redirect,flash,url_for
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    flash,
+    url_for
+    )
 
 
 def loadClubs():
@@ -26,7 +33,37 @@ def index():
 
 @app.route('/showSummary',methods=['POST'])
 def showSummary():
-    club = [club for club in clubs if club['email'] == request.form['email']][0]
+    """
+    Validate a club's email submitted for login and render the welcome page
+    This endpoint expects POST form data with an ``email`` field. The value is
+    trimmed and lowercased, then matched case-insensitively against the in-memory
+    ``clubs`` list. If the email is missing or unknown, a flash message is queued
+    and the index page is rendered with HTTP 400.
+
+    Returns:
+        flask.Response: 
+            - 200 OK with ``welcome.html`` when a matching club is found. 
+              Template context includes ``club`` (dict) and ``competitions`` (list).
+            - 400 Bad Request with ``index.html`` when the email is missing or unknown.
+
+    Notes:
+        - Intended for browser form submissions (``application/x-www-form-urlencoded``
+          or ``multipart/form-data``).
+        - Uses ``flash()`` to display error messages in templates.
+    """
+    email = request.form['email']
+
+    if not email:
+        flash("Email manquant.")
+        return render_template('index.html'), 400
+
+    email = email.strip().lower()
+    club = next((c for c in clubs if c.get('email', '').lower() == email), None)
+
+    if not club:
+        flash("Adresse e-mail inconnue.")
+        return render_template('index.html'), 400
+    
     return render_template('welcome.html',club=club,competitions=competitions)
 
 
